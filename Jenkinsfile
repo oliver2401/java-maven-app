@@ -6,6 +6,7 @@ pipeline {
                 script {
                     echo "Testing the application...."
                     echo "executing pipeline on branch: $BRANCH_NAME"
+                    echo "adding webhook"
                 }
             }
         }
