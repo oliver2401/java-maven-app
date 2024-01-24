@@ -60,7 +60,7 @@ pipeline {
                         sh "git remote set-url origin https://github.com/oliver2401/java-maven-app.git"
                         sh 'git add .'
                         sh 'git commit -m "ci: version bump"'
-                        sh 'echo $PASS | git push https://${USER}:@github.com/oliver2401/java-maven-app.git HEAD:jenkins-jobs-github'
+                        sh "echo ${PASS} | git push https://${USER}:@github.com/oliver2401/java-maven-app.git HEAD:jenkins-jobs-github"
                     }
                 }
             }
