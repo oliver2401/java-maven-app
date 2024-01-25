@@ -45,30 +45,12 @@ pipeline {
         stage("deploy") {
             steps {
                 script {
-                    echo 'deploying docker image to EC2...'
-
-                    def shellCmd = "bash ./server-cmds.sh ${IMAGE_NAME}"
-                    def ec2Instance = "ec2-user@3.89.102.151"
-
+                    def dockerCmd = 'docker run -p 8080:8080 -d oliver2401/demo-app:1.0'
                     sshagent(['ec2-server-key']) {
-                        sh "scp server-cmds.sh ${ec2Instance}:/home/ec2-user"
-                        sh "scp docker-compose.yaml ${ec2Instance}:/home/ec2-user"
-                        sh "ssh -o StrictHostKeyChecking=no ${ec2Instance} ${shellCmd}"
+                       sh "ssh -o StrictHostKeyChecking=no ec2-user@3.89.102.151 ${dockerCmd}"      
                     }
                 }
             }               
-        }
-        stage('commit version update'){
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'oliver-github', passwordVariable: 'PASS', usernameVariable: 'USER')]){
-                        sh 'git remote set-url origin https://${USER}:${PASS}@github.com/oliver2401/java-maven-app.git'
-                        sh 'git add .'
-                        sh 'git commit -m "ci: version bump"'
-                        sh 'git push origin HEAD:jenkins-jobs'
-                    }
-                }
-            }
         }
     }
 }
