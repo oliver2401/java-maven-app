@@ -24,11 +24,11 @@ pipeline {
         }
 
         stage("deploy") {
-            when {
+            /*when {
                 expression { 
                     BRANCH_NAME == "main" 
                 }
-            }
+            }*/
             steps {
                 script {
                     def dockerCmd = 'docker run -p 3080:3080 -d oliver2401/demo-app:1.0'
