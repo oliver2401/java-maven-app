@@ -22,7 +22,7 @@ pipeline {
                         versions:commit'
                     def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
                     def version = matcher[0][1]
-                    env.IMAGE_NAME = "oliver2401/demo-app:java-maven-1.0"
+                    env.IMAGE_NAME = "$version-$BUILD_NUMBER"
                 }
             }
         }
@@ -46,14 +46,28 @@ pipeline {
             steps {
                 script {
                     echo 'deploying the docker image to EC2'
-                    def shellCmd = "bash ./server-cmds.sh"
+                    def shellCmd = "bash ./server-cmds.sh ${IMAGE_NAME}"
+                    def ec2Instance = "ec2-user@3.89.102.151"
+
                     sshagent(['ec2-server-key']) {
-                        sh "scp server-cmds.sh ec2-user@3.89.102.151:/home/ec2-user"
-                        sh "scp docker-compose.yaml ec2-user@3.89.102.151:/home/ec2-user"
-                        sh "ssh -o StrictHostKeyChecking=no ec2-user@3.89.102.151 ${shellCmd}"      
+                        sh "scp server-cmds.sh ${ec2Instance}:/home/ec2-user"
+                        sh "scp docker-compose.yaml ${ec2Instance}:/home/ec2-user"
+                        sh "ssh -o StrictHostKeyChecking=no ${ec2Instance} ${shellCmd}"
                     }
                 }
             }               
+        }
+        stage('commit version update'){
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'gitlab-credentials', passwordVariable: 'PASS', usernameVariable: 'USER')]){
+                        sh "git remote set-url origin https://${USER}:${PASS}@github.com/oliver2401/java-maven-app.git"
+                        sh 'git add .'
+                        sh 'git commit -m "ci: version bump"'
+                        sh 'git push origin HEAD:jenkins-jobs-github'
+                    }
+                }
+            }
         }
     }
 }
