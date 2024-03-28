@@ -41,9 +41,8 @@ pipeline {
       steps {
         script {
           dir('terraform') {
-           /* sh "terraform init"
-            sh "terraform apply --auto-approve" */
-            sh "terraform destroy --auto-approve"
+            sh "terraform init"
+            sh "terraform apply --auto-approve"
             EC2_PUBLIC_IP = sh(
               script: "terraform output ec2-public_ip",
               returnStdout: true
@@ -52,7 +51,7 @@ pipeline {
         }
       }
     }
-    /*stage("deploy") {
+    stage("deploy") {
       environment {
         DOCKER_CREDS = credentials('docker-hub-repo')
       }
@@ -74,6 +73,6 @@ pipeline {
           }
         }
       }
-    } */              
+    }               
   }
 }
